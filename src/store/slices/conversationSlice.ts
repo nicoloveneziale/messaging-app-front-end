@@ -40,6 +40,7 @@ const initialState: ConverstaionsState = {
     messagesError: null
 }
 
+//Conversation slice
 export const conversationSlice = createSlice({
     name: "conversations",
     initialState,

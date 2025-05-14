@@ -1,18 +1,23 @@
 import {
   createBrowserRouter,
-} from "react-router-dom";
-import type {
-  RouteObject
+  createRoutesFromElements,
+  Route,
 } from "react-router-dom";
 import Root from "./Root";
+import Login from "../pages/Login";
+//import Register from "../pages/Register";
+//import Chat from "../pages/Chat";
 
-const routes: RouteObject[] = [
-  {
-    path: "/",
-    element: <Root />,
-  },
-];
-
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(
+  createRoutesFromElements(
+    <>
+      <Route path="/login" element={<Login />} />,
+      <Route path="/register"/>,
+      <Route path="/" element={<Root />}>
+        <Route path="/chat"/>
+      </Route>
+    </>
+  )
+);
 
 export default router;
