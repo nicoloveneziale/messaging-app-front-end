@@ -51,7 +51,9 @@ export const authSlice = createSlice({
 
 //Export actions to use in compononents to interact with the states
 export const {
-    loginSuccess
+    loginSuccess,
+    authRequest,
+    authFailure
 } = authSlice.actions;
 
 //Export the reducer to the store
