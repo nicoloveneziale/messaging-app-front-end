@@ -1,6 +1,6 @@
 const API_BASE_URL = "http://localhost:8080"; 
 
-export const getConversationMessages = async (conversationId: number, token: number) => {
+export const getConversationMessages = async (conversationId: number, token: string) => {
     try {
         const response = await fetch(`${API_BASE_URL}/:${conversationId}/messages`, {
             method: "GET",
@@ -22,7 +22,7 @@ export const getConversationMessages = async (conversationId: number, token: num
     }
 }   
 
-export const createMessage = async (conversationId:number, content: string, token: number) => {
+export const createMessage = async (conversationId:number, content: string, token: string) => {
     try {
         const response = await fetch(`${API_BASE_URL}/:${conversationId}/messages`, {
             method: "POST",
@@ -45,7 +45,7 @@ export const createMessage = async (conversationId:number, content: string, toke
     }
 }   
 
-export const deleteMessage = async (conversationId: number, messageId: number, token: number) => {
+export const deleteMessage = async (conversationId: number, messageId: number, token: string) => {
     try {
         const response = await fetch(`${API_BASE_URL}/:${conversationId}/messages/:${messageId}`, {
             method: "DELETE",

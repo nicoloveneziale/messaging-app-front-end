@@ -1,6 +1,6 @@
 const API_BASE_URL = "http://localhost:8080"; 
 
-export const createConversation = async (recipientId: string, token: number) => {
+export const createConversation = async (recipientId: string, token: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/conversations`, {
       method: 'POST',
@@ -24,7 +24,7 @@ export const createConversation = async (recipientId: string, token: number) => 
   }
 };
 
-export const getConversations = async (token: number) => {
+export const getConversations = async (token: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/conversations`, {
       method: 'GET',

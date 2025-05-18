@@ -6,7 +6,7 @@ import {
 import Root from "./Root";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
-//import Chat from "../pages/Chat";
+import Chat from "../pages/Chat";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -14,7 +14,7 @@ const router = createBrowserRouter(
       <Route path="/login" element={<Login />} />,
       <Route path="/register" element={<Register/>}/>,
       <Route path="/" element={<Root />}>
-        <Route path="/chat"/>
+        <Route path="/chat" element={<Chat/>}/>
       </Route>
     </>
   )
