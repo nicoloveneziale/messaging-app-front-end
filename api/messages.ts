@@ -29,7 +29,7 @@ export const createMessage = async (conversationId:number, content: string, toke
             headers: {
                 "Authorization": `Bearer ${token}`,
             },
-            body: JSON.stringify(content)
+            body: JSON.stringify({content})
         })
 
          if (!response.ok) {
