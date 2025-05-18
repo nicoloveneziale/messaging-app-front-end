@@ -52,6 +52,7 @@ export const authSlice = createSlice({
 //Export actions to use in compononents to interact with the states
 export const {
     loginSuccess,
+    logout,
     authRequest,
     authFailure
 } = authSlice.actions;
