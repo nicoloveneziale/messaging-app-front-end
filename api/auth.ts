@@ -54,3 +54,34 @@ export const registerUser = async (username: string, password: string, email: st
     throw error;
   }
 };
+
+export const verifyAuthToken = async (token: string) => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/verify`, { 
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!response.ok) {
+            let errorMessage = 'Token verification failed';
+            try {
+                const errorData = await response.json();
+                errorMessage = errorData.message || errorMessage;
+            } catch (error) {
+                const textError = await response.text();
+                errorMessage = textError || errorMessage;
+                console.log(error)
+            }
+            throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        return data.user;
+    } catch (error: any) {
+        console.error('Token verification API Error:', error);
+        throw error;
+    }
+};

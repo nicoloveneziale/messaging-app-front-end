@@ -26,9 +26,9 @@ const Register: React.FC<RegisterProps> = () => {
       const data = await registerUser(username, password, email);
       dispatch(
         loginSuccess({
-            id: data.user.id,
-            username: data.user.username,
-            email: data.user.email,
+            id: data.newUser.id,
+            username: data.newUser.username,
+            email: data.newUser.email,
             token: data.token
         })
         )

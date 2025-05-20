@@ -8,14 +8,19 @@ interface AuthState {
     username: string | null;
     email: string | null;
     token: string | null;
-  } | null;
+  };
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
 }
 
 const initialState: AuthState = {
-  user: null,
+  user: {
+    id: null,
+    username: null,
+    email: null,
+    token: null,
+  },
   isAuthenticated: false,
   loading: false,
   error: null,
@@ -31,12 +36,20 @@ export const authSlice = createSlice({
             state.user = action.payload;
             state.isAuthenticated = true;
             state.error = null;
+            localStorage.setItem('authToken', action.payload.token);
+             localStorage.setItem('authUserId', String(action.payload.id)); 
+             localStorage.setItem('authUsername', action.payload.username);
+             localStorage.setItem('authUserEmail', action.payload.email);
         },
         logout: (state) => {
-            state.user = null;
+            state.user = { ...initialState.user };
             state.isAuthenticated = false;
             state.loading = false;
             state.error = null;
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('authUserId');
+            localStorage.removeItem('authUsername');
+            localStorage.removeItem('authUserEmail');            
         },
         authRequest: (state) => {
             state.loading = true;
@@ -45,16 +58,23 @@ export const authSlice = createSlice({
         authFailure (state, action: PayloadAction<string>) {
             state.loading = false;
             state.error = action.payload;
+            state.user = { ...initialState.user };
+        },
+        setUserFromPersistedStorage: (state, action: PayloadAction<{ id: number; username: string; email: string; token: string }>) => {
+        state.user = action.payload;
+        state.loading = false; 
+        state.isAuthenticated = true;
+        state.error = null;
         }
     }
 })
 
-//Export actions to use in compononents to interact with the states
 export const {
     loginSuccess,
     logout,
     authRequest,
-    authFailure
+    authFailure,
+    setUserFromPersistedStorage
 } = authSlice.actions;
 
 //Export the reducer to the store
