@@ -28,6 +28,8 @@ interface ConverstaionsState {
   messages: Message[];
   messagesLoading: boolean;
   messagesError: string | null;
+  searchUserError: string | null; 
+  newConversationLoading: boolean; 
 }
 
 const initialState: ConverstaionsState = {
@@ -37,7 +39,9 @@ const initialState: ConverstaionsState = {
   currentConversationId: null,
     messages: [],
     messagesLoading: false,
-    messagesError: null
+    messagesError: null,
+    searchUserError: null,
+    newConversationLoading: false,
 }
 
 //Conversation slice
@@ -60,6 +64,8 @@ export const conversationSlice = createSlice({
         },
         setCurrentConversationId: (state, action: PayloadAction<number | null>) => {
             state.currentConversationId = action.payload;
+            state.messages = [];
+            state.messagesError = null;
         },
         setMessages: (state, action: PayloadAction<Message[]>) => { 
             state.messagesLoading = false;
@@ -82,9 +88,32 @@ export const conversationSlice = createSlice({
             state.conversations = state.conversations.map(conv =>
                 conv.id === action.payload.conversationId ? { ...conv, lastMessage: action.payload } : conv
             );
+            state.conversations.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
         },
         addNewConversation: (state, action: PayloadAction<Conversation>) => {
             state.conversations.push(action.payload);
+            state.newConversationLoading = false;
+        },
+        startNewConversationRequest: (state) => {
+            state.newConversationLoading = true;
+            state.error = null; 
+            state.searchUserError = null; 
+        },
+        startNewConversationFailure: (state, action: PayloadAction<string>) => {
+            state.newConversationLoading = false;
+            state.error = action.payload; 
+        },
+        searchUserNotFound: (state, action: PayloadAction<string>) => {
+            state.newConversationLoading = false; 
+            state.searchUserError = action.payload; 
+        },
+        clearSearchUserError: (state) => {
+            state.searchUserError = null; 
+        },
+        conversationAlreadyExists: (state, action: PayloadAction<number>) => {
+            state.newConversationLoading = false;
+            state.currentConversationId = action.payload; 
+            state.searchUserError = 'Conversation with this user already exists. Selected existing chat.'; 
         }
     }
 })
@@ -98,6 +127,12 @@ export const {
   fetchMessagesRequest,
   fetchMessagesFailure,
   addNewMessage,
+  addNewConversation, 
+  startNewConversationRequest,
+  startNewConversationFailure,
+  searchUserNotFound,
+  clearSearchUserError,
+  conversationAlreadyExists 
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;
