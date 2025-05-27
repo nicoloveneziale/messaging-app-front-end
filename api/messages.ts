@@ -1,8 +1,8 @@
-const API_BASE_URL = "http://localhost:8080"; 
+const API_BASE_URL = "http://localhost:8080/conversations"; 
 
 export const getConversationMessages = async (conversationId: number, token: string) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/:${conversationId}/messages`, {
+        const response = await fetch(`${API_BASE_URL}/${conversationId}/messages`, {
             method: "GET",
             headers: {
                 "Authorization": `Bearer ${token}`,
@@ -24,10 +24,11 @@ export const getConversationMessages = async (conversationId: number, token: str
 
 export const createMessage = async (conversationId:number, content: string, token: string) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/:${conversationId}/messages`, {
+        const response = await fetch(`${API_BASE_URL}/${conversationId}/messages`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
             },
             body: JSON.stringify({content})
         })
@@ -47,7 +48,7 @@ export const createMessage = async (conversationId:number, content: string, toke
 
 export const deleteMessage = async (conversationId: number, messageId: number, token: string) => {
     try {
-        const response = await fetch(`${API_BASE_URL}/:${conversationId}/messages/:${messageId}`, {
+        const response = await fetch(`${API_BASE_URL}/${conversationId}/messages/:${messageId}`, {
             method: "DELETE",
             headers: {
                 "Authorization": `Bearer ${token}`,

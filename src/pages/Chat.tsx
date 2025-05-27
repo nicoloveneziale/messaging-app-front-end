@@ -1,45 +1,80 @@
-import React from 'react';
-import ConversationList from '../components/ConversationList'; 
-import { useSelector } from 'react-redux';
-import type { RootState } from '../store/store';
+import React, { useState } from 'react';
+import ConversationList from '../components/ConversationList';
+import MessageList from '../components/MessageList'; 
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState, AppDispatch } from '../store/store';
+import { addNewMessage } from '../store/slices/conversationSlice'; 
+import { createMessage } from '../../api/messages'; 
 
 const Chat: React.FC = () => {
+  const dispatch: AppDispatch = useDispatch();
   const currentConversationId = useSelector((state: RootState) => state.conversations.currentConversationId);
   const conversationsSelect = useSelector((state: RootState) => state.conversations.conversations);
+  const currentUser = useSelector((state: RootState) => state.auth.user); 
+
   const conversations = Array.isArray(conversationsSelect)
     ? conversationsSelect
     : [];
-  console.log('Chat.tsx: Value of conversations:', conversations);
-  console.log('Chat.tsx: Type of conversations:', typeof conversations);
-  console.log('Chat.tsx: Is conversations an Array?', Array.isArray(conversations));
   const currentConversation = conversations.find(c => c.id === currentConversationId);
+
+  const [messageContent, setMessageContent] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim() || !currentConversationId || isSending) {
+      return; 
+    }
+
+    setIsSending(true);
+    try {
+      const token = localStorage.getItem("authToken")
+      const newMessage = await createMessage(currentConversationId, messageContent, token);
+      dispatch(addNewMessage(newMessage)); 
+      setMessageContent(''); 
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) { 
+      e.preventDefault(); 
+      handleSendMessage();
+    }
+  };
 
   return (
     <div className="flex h-full">
-      <ConversationList /> 
+      <ConversationList />
       <div className="flex-grow flex flex-col p-4 bg-gray-900 text-gray-100">
         {currentConversation ? (
           <>
             <h2 className="text-2xl font-bold mb-4">
-              Chat with: {currentConversation.name || currentConversation.participants.map(p => p.username).join(', ')}
+              Chat with: {currentConversation.name || currentConversation.participants.map(p => p.user.username).join(', ')}
             </h2>
-            <div className="flex-grow bg-gray-800 rounded-lg p-4 overflow-y-auto">
-              <p>Messages for Conversation ID: {currentConversationId}</p>
-              <p>Implement your MessageList component here!</p>
-              {[...Array(20)].map((_, i) => (
-                <div key={i} className="mb-2 p-2 bg-gray-700 rounded">
-                  This is message {i + 1} in conversation {currentConversation.name || currentConversation.id}
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
+            <MessageList />
+            <div className="mt-4 flex gap-2">
               <input
                 type="text"
                 placeholder="Type your message..."
-                className="w-full p-3 rounded bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={isSending}
+                className="flex-grow p-3 rounded bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               />
-              <button className="mt-2 w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition duration-200">
-                Send
+              <button
+                onClick={handleSendMessage}
+                disabled={isSending || !messageContent.trim()}
+                className={`py-2 px-6 rounded transition duration-200 font-semibold ${
+                  isSending || !messageContent.trim()
+                    ? 'bg-gray-500 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700'
+                } text-white`}
+              >
+                {isSending ? 'Sending...' : 'Send'}
               </button>
             </div>
           </>

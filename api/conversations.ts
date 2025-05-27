@@ -25,7 +25,7 @@ export const searchUserByUsername = async (username: string) => {
     throw new Error('No authentication token found.');
   }
 
-  const response = await fetch(`${API_BASE_URL}/users/:${username}`, {
+  const response = await fetch(`${API_BASE_URL}/users/${username}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,

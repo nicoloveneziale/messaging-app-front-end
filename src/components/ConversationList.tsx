@@ -36,7 +36,7 @@ const ConversationList: React.FC = () => {
     newConversationLoading,
   } = conversationsState;
 
-  const currentUser = useSelector((state: RootState) => state.auth.user); // Assuming user object in auth state
+  const currentUser = useSelector((state: RootState) => state.auth.user);
 
   const [searchUsername, setSearchUsername] = useState('');
 
@@ -50,7 +50,7 @@ const ConversationList: React.FC = () => {
       try {
         const token = localStorage.getItem("authToken")
         const data = await fetchAllConversations(token);
-        dispatch(setConversations(data));
+        dispatch(setConversations(data.conversations));
       } catch (err: any) {
         dispatch(fetchConversationsFailure(err.message || 'Failed to load conversations.'));
       }
@@ -93,7 +93,7 @@ const ConversationList: React.FC = () => {
         return;
       }
 
-      const newConversation = await startNewConversation([currentUser.id!, targetUser.id], false, null);
+      const newConversation = await startNewConversation([currentUser.id, targetUser.id], false, null);
       dispatch(addNewConversation(newConversation)); 
       setSearchUsername(''); 
 
