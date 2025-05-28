@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'; 
+import React, { useEffect, useState, useRef, useCallback } from 'react'; 
 import { useSelector, useDispatch } from 'react-redux';
 import { io, Socket } from 'socket.io-client'; 
 import type { RootState, AppDispatch } from '../store/store';
@@ -26,6 +26,15 @@ interface Message {
   createdAt: string; 
 }
 
+const debounce = <T extends (...args: any[]) => void>(func: T, delay: number) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    const context = this;
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(context, args), delay);
+  };
+};
+
 const Chat: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const {
@@ -47,7 +56,8 @@ const Chat: React.FC = () => {
 
   const [messageContent, setMessageContent] = useState('');
   const [isSending, setIsSending] = useState(false); 
-
+  const [typingUsers, setTypingUsers] = useState<Map<number, string>>(new Map());
+  const [isLocalUserTyping, setIsLocalUserTyping] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
 
@@ -73,12 +83,38 @@ const Chat: React.FC = () => {
 
     newSocket.on('disconnect', () => {
       setSocketConnected(false);
+      setTypingUsers(new Map());
+    });
+
+    newSocket.on('typing:start', (data: { conversationId: number; userId: number; username: string }) => {
+      if (data.conversationId === currentConversationId && data.userId !== currentUser?.id) {
+        setTypingUsers(prev => {
+          const newMap = new Map(prev);
+          newMap.set(data.userId, data.username);
+          return newMap;
+        });
+      }
+    });
+
+    newSocket.on('typing:stop', (data: { conversationId: number; userId: number }) => {
+      if (data.conversationId === currentConversationId) {
+        setTypingUsers(prev => {
+          const newMap = new Map(prev);
+          newMap.delete(data.userId);
+          return newMap;
+        });
+      }
     });
 
     newSocket.on('message:new', (newMessage: Message) => {
       if (newMessage.conversationId === currentConversationId) {
         dispatch(addNewMessage(newMessage));
       }
+      setTypingUsers(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(newMessage.sender.id);
+        return newMap;
+      });
     });
 
     return () => {
@@ -86,9 +122,12 @@ const Chat: React.FC = () => {
         newSocket.off('connect');
         newSocket.off('connect_error');
         newSocket.off('disconnect');
+        newSocket.off('typing:start'); 
+        newSocket.off('typing:stop'); 
         newSocket.off('message:new');
         newSocket.disconnect(); 
         socketRef.current = null;
+        setIsLocalUserTyping(false);
       }
     };
   }, [dispatch, currentUser?.id, currentConversationId]); 
@@ -120,6 +159,9 @@ const Chat: React.FC = () => {
     if (socket && socketConnected && currentConversationId !== null) {
       socket.emit('join_conversation', currentConversationId);
 
+       setTypingUsers(new Map());
+      setIsLocalUserTyping(false);
+
       const getMessages = async () => {
         if (!currentUser?.id || currentConversationId === null) {
           return;
@@ -137,8 +179,30 @@ const Chat: React.FC = () => {
       };
       getMessages();
     }
+    if (currentConversationId === null || !socketConnected) {
+        setTypingUsers(new Map());
+        setIsLocalUserTyping(false);
+    }
   }, [currentConversationId, socketConnected, currentUser?.id, dispatch]); 
 
+  const emitTypingStart = useCallback(debounce(() => {
+    const socket = socketRef.current;
+    if (socket && socketConnected && currentConversationId !== null) {
+      socket.emit('typing:start', currentConversationId); 
+      setIsLocalUserTyping(true); 
+    }
+  }, 500), [socketRef.current, socketConnected, currentConversationId]); 
+
+  const emitTypingStop = useCallback(debounce(() => {
+    const socket = socketRef.current;
+    if (socket && socketConnected && currentConversationId !== null) {
+      socket.emit('typing:stop', currentConversationId);
+      setIsLocalUserTyping(false); 
+    }
+  }, 1000), [socketRef.current, socketConnected, currentConversationId]); 
+
+
+  //send message and emmits it over socket
   const handleSendMessage = async () => {
     const socket = socketRef.current;
     if (!messageContent.trim() || !currentConversationId || isSending || !socket || !socketConnected) {
@@ -170,6 +234,33 @@ const Chat: React.FC = () => {
     }
   };
 
+   const handleContentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageContent(e.target.value);
+
+    if (e.target.value.length > 0 && !isLocalUserTyping) {
+      emitTypingStart();
+    }
+    else if (e.target.value.length === 0 && isLocalUserTyping) {
+      emitTypingStop();
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (isLocalUserTyping) {
+      emitTypingStop();
+    }
+  }
+
+   const getTypingIndicatorText = () => {
+    const othersTyping = Array.from(typingUsers.values()).filter(name => name !== currentUser?.username);
+
+    if (othersTyping.length === 0) return null;
+
+    if (othersTyping.length === 1) return `${othersTyping[0]} is typing...`;
+    if (othersTyping.length === 2) return `${othersTyping[0]} and ${othersTyping[1]} are typing...`;
+    return `${othersTyping.slice(0, 2).join(', ')} and ${othersTyping.length - 2} others are typing...`;
+  };
+
   return (
     <div className="flex h-full bg-dark-gray-bg text-light-gray-text">
       <div className="w-1/4 bg-medium-gray p-4 border-r border-gray-700 overflow-y-auto custom-scrollbar rounded-lg m-2">
@@ -188,23 +279,31 @@ const Chat: React.FC = () => {
                 <MessageList messages={messages} currentUser={currentUser} />
               )}
             </div>
+
+            {getTypingIndicatorText() && (
+              <div className="text-gray-400 text-sm italic mt-2 ml-3">
+                {getTypingIndicatorText()}
+              </div>
+            )}
+
             <div className="mt-4 flex gap-3">
               <input
                 type="text"
                 placeholder={socketConnected ? "Type your message..." : "Connecting to chat..."}
                 value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
+                onChange={handleContentChange}
                 onKeyDown={handleKeyDown}
-                disabled={isSending || !socketConnected || messagesLoading} 
+                onBlur={handleInputBlur} 
+                disabled={isSending || !socketConnected || messagesLoading}
                 className="flex-grow p-3 rounded-lg bg-gray-800 text-light-gray-text border border-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-blue disabled:opacity-50 placeholder-gray-400"
               />
               <button
                 onClick={handleSendMessage}
-                disabled={isSending || !messageContent.trim() || !socketConnected || messagesLoading} 
+                disabled={isSending || !messageContent.trim() || !socketConnected || messagesLoading}
                 className={`py-2 px-6 rounded-lg transition duration-200 font-semibold ${
                   isSending || !messageContent.trim() || !socketConnected || messagesLoading
                     ? 'bg-gray-600 cursor-not-allowed text-gray-400'
-                    : 'bg-accent-blue hover:bg-blue-600 text-white' 
+                    : 'bg-accent-blue hover:bg-amber-600 text-white'
                 } shadow-md`}
               >
                 {isSending ? 'Sending...' : 'Send'}
