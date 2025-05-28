@@ -10,7 +10,6 @@ const Chat: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const currentConversationId = useSelector((state: RootState) => state.conversations.currentConversationId);
   const conversationsSelect = useSelector((state: RootState) => state.conversations.conversations);
-  const currentUser = useSelector((state: RootState) => state.auth.user); 
 
   const conversations = Array.isArray(conversationsSelect)
     ? conversationsSelect
@@ -29,7 +28,7 @@ const Chat: React.FC = () => {
     try {
       const token = localStorage.getItem("authToken")
       const newMessage = await createMessage(currentConversationId, messageContent, token);
-      dispatch(addNewMessage(newMessage)); 
+      dispatch(addNewMessage(newMessage.message)); 
       setMessageContent(''); 
     } catch (error) {
       console.error('Failed to send message:', error);
