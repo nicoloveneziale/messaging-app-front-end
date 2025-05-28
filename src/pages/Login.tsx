@@ -45,36 +45,42 @@ const Login: React.FC<LoginProps> = () => {
   };
 
   return (
-    <div className="login-container">
-      <h1>Login</h1>
-      <form onSubmit={handleLogin} className="login-form">
+    <div className="justify-items-center content-center w-full h-full">
+      <div className="bg-gray-700 py-4 px-2 rounded-lg h-7/10 w-1/2 justify-items-center text-3xl">
+      <h1 className='text-5xl font-bold mt-5 mb-15 border-b-4 border-gray-800 pb-4'>Login</h1>
+      <form onSubmit={handleLogin} className="login-form bg-gray-800 rounded py-12 px-5 justify-items-center">
         <div className="form-group">
-          <label htmlFor="username">Username:</label>
+          <label htmlFor="username" className=' font-bold'>Username:</label>
+          <br />
           <input
             type="text"
             id="username"
+            className='bg-gray-100 rounded m-3 text-gray-950'
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
           />
         </div>
         <div className="form-group">
-          <label htmlFor="password">Password:</label>
+          <label htmlFor="password" className='font-bold'>Password:</label>
+          <br />
           <input
             type="password"
             id="password"
+            className='bg-gray-100 rounded m-3 text-gray-950'
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
-        <button type="submit" className="login-button">
+        <button type="submit" className="login-button bg-amber-600 my-3 px-12 py-2 rounded">
           Login
         </button>
-        <p className="signup-link">
+        <p className="signup-link text-2xl">
           Don't have an account? <a href="/register">Sign Up</a>
         </p>
       </form>
+      </div>
     </div>
   );
 };

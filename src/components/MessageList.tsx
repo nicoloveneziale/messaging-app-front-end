@@ -52,7 +52,7 @@ const MessageList: React.FC = () => {
   }
 
   return (
-    <div className="flex-grow bg-gray-800 rounded-lg p-4 overflow-y-auto custom-scrollbar">
+    <div className="flex-grow bg-gray-800 rounded-lg p-4 overflow-y-scroll custom-scrollbar">
       {messages.length === 0 && (
         <p className="text-gray-400 text-center">No messages yet. Send the first one!</p>
       )}

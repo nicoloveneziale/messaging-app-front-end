@@ -45,45 +45,47 @@ const Chat: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full">
-      <ConversationList />
-      <div className="flex-grow flex flex-col p-4 bg-gray-900 text-gray-100">
-        {currentConversation ? (
-          <>
-            <h2 className="text-2xl font-bold mb-4">
-              Chat with: {currentConversation.name || currentConversation.participants.map(p => p.user.username).join(', ')}
-            </h2>
-            <MessageList />
-            <div className="mt-4 flex gap-2">
-              <input
-                type="text"
-                placeholder="Type your message..."
-                value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
-                onKeyDown={handleKeyDown}
-                disabled={isSending}
-                className="flex-grow p-3 rounded bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-              />
-              <button
-                onClick={handleSendMessage}
-                disabled={isSending || !messageContent.trim()}
-                className={`py-2 px-6 rounded transition duration-200 font-semibold ${
-                  isSending || !messageContent.trim()
-                    ? 'bg-gray-500 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700'
-                } text-white`}
-              >
-                {isSending ? 'Sending...' : 'Send'}
-              </button>
-            </div>
-          </>
-        ) : (
-          <p className="text-gray-400 text-center text-xl mt-10">
-            Select a conversation or start a new one!
-          </p>
-        )}
-      </div>
-    </div>
+   <div className="flex h-full bg-dark-gray-bg text-light-gray-text">
+
+  <div className="w-1/4 bg-medium-gray p-4 border-r border-gray-700 overflow-y-auto custom-scrollbar rounded-lg m-2">
+    <ConversationList />
+  </div>
+
+  <div className="flex-grow flex flex-col p-4 bg-medium-gray text-light-gray-text m-2 rounded-lg shadow-lg">
+    {currentConversation ? (
+      <>
+        <MessageList />
+
+        <div className="mt-4 flex gap-3">
+          <input
+            type="text"
+            placeholder="Type your message..."
+            value={messageContent}
+            onChange={(e) => setMessageContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isSending}
+            className="flex-grow p-3 rounded-lg bg-gray-700 text-light-gray-text border border-gray-600 focus:outline-none focus:ring-2 focus:ring-accent-blue disabled:opacity-50 placeholder-gray-400"
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={isSending || !messageContent.trim()}
+            className={`py-2 px-6 rounded-lg transition duration-200 font-semibold ${
+              isSending || !messageContent.trim()
+                ? 'bg-gray-600 cursor-not-allowed text-gray-400'
+                : 'bg-accent-blue hover:bg-blue-600 text-white'
+            } shadow-md`}
+          >
+            {isSending ? 'Sending...' : 'Send'}
+          </button>
+        </div>
+      </>
+    ) : (
+      <p className="text-gray-400 text-center text-xl mt-10 p-4 rounded-lg bg-gray-800">
+        Select a conversation or start a new one!
+      </p>
+    )}
+  </div>
+</div>
   );
 };
 

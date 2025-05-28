@@ -74,7 +74,7 @@ const Root: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gray-800 text-gray-100">
+    <div className="flex flex-col h-screen bg-gray-700 text-gray-100">
       <header className="bg-gray-900 text-white p-4 flex justify-between items-center shadow-md">
         <h1 className="text-2xl font-bold">Posto</h1>
         {isAuthenticated && (

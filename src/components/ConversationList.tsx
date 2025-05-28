@@ -117,25 +117,24 @@ const ConversationList: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-700 w-64 p-4 flex flex-col h-full border-r border-gray-600">
-      <h2 className="text-xl font-semibold mb-4 text-white">Conversations</h2>
-      <div className="mb-6 pb-4 border-b border-gray-600">
-        <h3 className="text-lg font-medium mb-2 text-white">Start New Chat</h3>
+    <div className="bg-gray-600 w-full p-4 flex flex-col h-full rounded border-r border-gray-600">
+      <div className="mb-6 p-4 border-b border-gray-700">
+        <h3 className="text-lg font-medium m-2 text-white">New Conversation</h3>
         <input
           type="text"
           placeholder="Enter username"
           value={searchUsername}
           onChange={(e) => setSearchUsername(e.target.value)}
-          className="w-full p-2 rounded bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+          className="w-3/4 mr-2 p-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
         />
         <button
           onClick={handleStartNewConversation}
           disabled={newConversationLoading} 
-          className={`w-full py-2 px-4 rounded transition duration-200 ${
+          className={`w-1/5 p-2 rounded transition duration-200 ${
             newConversationLoading ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
           } text-white font-semibold`}
         >
-          {newConversationLoading ? 'Searching...' : 'Search & Start Chat'}
+          Search
         </button>
         {searchUserError && <p className="text-red-400 text-sm mt-2">{searchUserError}</p>}
         {error && !searchUserError && <p className="text-red-400 text-sm mt-2">{error}</p>}
