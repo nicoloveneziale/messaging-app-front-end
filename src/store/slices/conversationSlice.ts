@@ -81,7 +81,6 @@ export const conversationSlice = createSlice({
             state.messagesError = action.payload;
         },
         addNewMessage: (state, action: PayloadAction<Message>) => { 
-            console.log(action.payload)
             if (state.currentConversationId === action.payload.conversationId) {
                 state.messages.push(action.payload);
             }

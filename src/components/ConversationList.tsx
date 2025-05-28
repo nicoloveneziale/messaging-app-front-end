@@ -94,7 +94,7 @@ const ConversationList: React.FC = () => {
       }
 
       const newConversation = await startNewConversation([currentUser.id, targetUser.id], false, null);
-      dispatch(addNewConversation(newConversation)); 
+      dispatch(addNewConversation(newConversation.conversation)); 
       setSearchUsername(''); 
 
     } catch (err: any) {
@@ -125,13 +125,14 @@ const ConversationList: React.FC = () => {
           placeholder="Enter username"
           value={searchUsername}
           onChange={(e) => setSearchUsername(e.target.value)}
-          className="w-3/4 mr-2 p-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+          className="w-full mr-2 p-2 rounded-lg bg-gray-800 text-gray-100 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-2"
         />
+        <br />
         <button
           onClick={handleStartNewConversation}
           disabled={newConversationLoading} 
-          className={`w-1/5 p-2 rounded transition duration-200 ${
-            newConversationLoading ? 'bg-gray-500 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+          className={`w-full p-2 rounded transition duration-200 ${
+            newConversationLoading ? 'bg-gray-500 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-700'
           } text-white font-semibold`}
         >
           Search
@@ -153,7 +154,7 @@ const ConversationList: React.FC = () => {
             key={conv.id}
             className={`p-3 rounded-lg mb-2 cursor-pointer transition duration-200 ${
               conv.id === currentConversationId
-                ? 'bg-blue-600 text-white'
+                ? 'bg-amber-600 text-white'
                 : 'bg-gray-800 hover:bg-gray-600 text-gray-100'
             }`}
             onClick={() => handleSelectConversation(conv.id)}
