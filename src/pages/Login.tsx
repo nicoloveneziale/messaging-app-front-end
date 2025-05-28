@@ -48,7 +48,7 @@ const Login: React.FC<LoginProps> = () => {
     <div className="justify-items-center content-center w-full h-full">
       <div className="bg-gray-700 py-4 px-2 rounded-lg h-7/10 w-1/2 justify-items-center text-3xl">
       <h1 className='text-5xl font-bold mt-5 mb-15 border-b-4 border-gray-800 pb-4'>Login</h1>
-      <form onSubmit={handleLogin} className="login-form bg-gray-800 rounded py-12 px-5 justify-items-center">
+      <form onSubmit={handleLogin} className="login-form bg-gray-800 max-h-8/10 min-w-8/10 rounded py-12 px-5 justify-items-center">
         <div className="form-group">
           <label htmlFor="username" className=' font-bold'>Username:</label>
           <br />
