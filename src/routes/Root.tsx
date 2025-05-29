@@ -37,7 +37,7 @@ const Root: React.FC = () => {
             token: storedToken,
           };
           dispatch(setUserFromPersistedStorage(payload));
-
+          navigate("/chat");
         } catch (error: any) {
           dispatch(logout());
         } finally {
@@ -51,6 +51,7 @@ const Root: React.FC = () => {
             dispatch(logout());
         }
         setInitialAuthChecked(true);
+        navigate("/login");
       }
     };
 

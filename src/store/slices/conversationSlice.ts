@@ -17,6 +17,7 @@ interface Conversation {
         user: {id: number, username: string}
     }[];
     lastMessage: {content: string; sender: {username:string}} | null;
+    isGroupChat: boolean | null;
     updatedAt: string;
 }
 

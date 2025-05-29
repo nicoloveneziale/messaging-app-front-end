@@ -17,11 +17,11 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUser }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'instant' });
   }, [messages]); 
 
   return (
-    <div className="flex-grow bg-gray-800 rounded-lg p-4 overflow-y-scroll custom-scrollbar">
+    <div className="flex-grow bg-gray-800 h-full rounded-lg p-4 overflow-y-scroll custom-scrollbar">
       {messages.length === 0 ? (
         <p className="text-gray-400 text-center">No messages yet. Send the first one!</p>
       ) : (

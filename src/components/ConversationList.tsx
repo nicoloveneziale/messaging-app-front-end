@@ -155,7 +155,7 @@ const ConversationList: React.FC = () => {
             className={`p-3 rounded-lg mb-2 cursor-pointer transition duration-200 ${
               conv.id === currentConversationId
                 ? 'bg-amber-600 text-white'
-                : 'bg-gray-800 hover:bg-gray-600 text-gray-100'
+                : 'bg-gray-800 hover:bg-amber-700 text-gray-100'
             }`}
             onClick={() => handleSelectConversation(conv.id)}
           >

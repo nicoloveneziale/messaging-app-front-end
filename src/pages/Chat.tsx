@@ -17,11 +17,12 @@ import {
 import {getConversationMessages} from "../../api/messages";
 import ConversationList from '../components/ConversationList';
 import MessageList from '../components/MessageList';
+import ProfileComponent from '../components/ProfileComponent';
 
 interface Message {
   id: number;
   conversationId: number;
-  sender: { id: number; username: string };
+  sender: { id: number; username: string, profileId: number };
   content: string;
   createdAt: string; 
 }
@@ -53,13 +54,13 @@ const Chat: React.FC = () => {
     ? conversationsFromState
     : [];
   const currentConversation = conversations.find(c => c.id === currentConversationId);
-
   const [messageContent, setMessageContent] = useState('');
   const [isSending, setIsSending] = useState(false); 
   const [typingUsers, setTypingUsers] = useState<Map<number, string>>(new Map());
   const [isLocalUserTyping, setIsLocalUserTyping] = useState(false);
   const socketRef = useRef<Socket | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
+  const [profileUser, setProfileUser] = useState(null)
 
   //Setts emitters and initializes socket
   useEffect(() => {
@@ -132,7 +133,7 @@ const Chat: React.FC = () => {
     };
   }, [dispatch, currentUser?.id, currentConversationId]); 
 
-
+  //Get conversations
   useEffect(() => {
     const getConversations = async () => {
       if (!currentUser?.id) {
@@ -261,6 +262,14 @@ const Chat: React.FC = () => {
     return `${othersTyping.slice(0, 2).join(', ')} and ${othersTyping.length - 2} others are typing...`;
   };
 
+  const handleProfileView = (user) => {
+    if (profileUser == user) {
+      setProfileUser(null);
+    } else {
+      setProfileUser(user)
+    }
+  }
+
   return (
     <div className="flex h-full bg-dark-gray-bg text-light-gray-text">
       <div className="w-1/4 bg-medium-gray p-4 border-r border-gray-700 overflow-y-auto custom-scrollbar rounded-lg m-2">
@@ -269,6 +278,14 @@ const Chat: React.FC = () => {
       <div className="flex-grow flex flex-col p-4 bg-medium-gray text-light-gray-text m-2 rounded-lg shadow-lg">
         {currentConversation ? (
           <>
+          <div className='bg-gray-800'>
+            <h1>{currentConversation.isGroupChat ?
+                  currentConversation.name : 
+                  currentConversation.participants
+                    .filter(p => p.user.id !== currentUser?.id) 
+                    .map(p => (<button key={p.user.id} onClick={() => handleProfileView(p.user)}>{p.user.username}</button>))                                          
+                }</h1>
+          </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-2">
               {messagesLoading && <p className="text-center text-gray-400">Loading messages...</p>}
               {messagesError && <p className="text-center text-red-400">Error: {messagesError}</p>}
@@ -308,6 +325,7 @@ const Chat: React.FC = () => {
               >
                 {isSending ? 'Sending...' : 'Send'}
               </button>
+              {profileUser ? (<ProfileComponent user={profileUser}/>) : <></>}
             </div>
           </>
         ) : (
