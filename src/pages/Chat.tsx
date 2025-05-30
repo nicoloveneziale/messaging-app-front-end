@@ -162,6 +162,7 @@ const Chat: React.FC = () => {
 
        setTypingUsers(new Map());
       setIsLocalUserTyping(false);
+      setProfileUser(null);
 
       const getMessages = async () => {
         if (!currentUser?.id || currentConversationId === null) {
@@ -270,16 +271,20 @@ const Chat: React.FC = () => {
     }
   }
 
+  const handleCloseProfile = useCallback(() => {
+    setProfileUser(null);
+  }, []);
+
   return (
     <div className="flex h-full bg-dark-gray-bg text-light-gray-text">
       <div className="w-1/4 bg-medium-gray p-4 border-r border-gray-700 overflow-y-auto custom-scrollbar rounded-lg m-2">
         <ConversationList />
       </div>
-      <div className="flex-grow flex flex-col p-4 bg-medium-gray text-light-gray-text m-2 rounded-lg shadow-lg">
+      <div className="w-3/4 flex flex-col p-4 bg-medium-gray text-light-gray-text m-2 rounded-lg shadow-lg">
         {currentConversation ? (
           <>
-          <div className='bg-gray-800'>
-            <h1>{currentConversation.isGroupChat ?
+          <div className='bg-gray-600 rounded m-3 px-4 py-2'>
+            <h1 className='text-2xl font-bold'>{currentConversation.isGroupChat ?
                   currentConversation.name : 
                   currentConversation.participants
                     .filter(p => p.user.id !== currentUser?.id) 
@@ -325,7 +330,14 @@ const Chat: React.FC = () => {
               >
                 {isSending ? 'Sending...' : 'Send'}
               </button>
-              {profileUser ? (<ProfileComponent user={profileUser}/>) : <></>}
+              <div className={`
+                fixed inset-y-0 right-0 w-80 lg:w-96 xl:w-1/4 bg-gray-800 shadow-2xl z-50
+                transform transition-transform duration-300 ease-in-out
+                ${profileUser ? 'translate-x-0' : 'translate-x-full'}
+                rounded-l-lg
+              `}>
+                {profileUser && <ProfileComponent user={profileUser} onClose={handleCloseProfile}/>}
+              </div>
             </div>
           </>
         ) : (
