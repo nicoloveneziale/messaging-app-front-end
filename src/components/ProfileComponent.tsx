@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {getProfile} from "../../api/profile"
+import { useSelector } from 'react-redux';
+import type { RootState } from "../store/store"
 
 interface User {
   id: number,
@@ -9,13 +11,15 @@ interface User {
 
 interface ProfileComponentProps {
   user: User;
-  onClose: () => void; // Add onClose prop
+  onClose: () => void; 
 }
 
 const ProfileComponent: React.FC<ProfileComponentProps> = ({ user, onClose }) => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const onlineUserIds = useSelector((state: RootState) => state.userStatus.onlineUserIds);
+  const isUserOnline = onlineUserIds.includes(user.id);
 
   useEffect(() => {
     const getProfileForUser = async () => {
@@ -85,8 +89,8 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({ user, onClose }) =>
               className="w-28 h-28 rounded-full border-4 border-blue-500 mb-4 object-cover object-center"
             />
             <h3 className="text-xl font-semibold text-white mb-1">{user.username}</h3>
-            <p className={`text-sm font-medium ${profile.status === 'Online' ? 'text-green-400' : 'text-yellow-400'}`}>
-              {profile.status || 'Offline'}
+            <p className={`text-sm font-medium ${isUserOnline ? 'text-green-400' : 'text-yellow-400'}`}>
+              {isUserOnline ? "Online" : "Offline"}
             </p>
           </div>
 

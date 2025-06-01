@@ -18,6 +18,7 @@ import {getConversationMessages} from "../../api/messages";
 import ConversationList from '../components/ConversationList';
 import MessageList from '../components/MessageList';
 import ProfileComponent from '../components/ProfileComponent';
+import { setOnlineUsers, updateUserStatus } from '../store/slices/userStatusSlice';
 
 interface Message {
   id: number;
@@ -87,6 +88,14 @@ const Chat: React.FC = () => {
       setTypingUsers(new Map());
     });
 
+    newSocket.on('initial_online_users', (data: {userIds: number[]}) => {
+      dispatch(setOnlineUsers(data))
+    })
+
+    newSocket.on('user:status', (data: {userId: number, status: string}) => {
+      dispatch(updateUserStatus(data));
+    })
+
     newSocket.on('typing:start', (data: { conversationId: number; userId: number; username: string }) => {
       if (data.conversationId === currentConversationId && data.userId !== currentUser?.id) {
         setTypingUsers(prev => {
@@ -117,6 +126,10 @@ const Chat: React.FC = () => {
         return newMap;
       });
     });
+
+    newSocket.on('user:status', (userId: number, status: string) => {
+
+    })
 
     return () => {
       if (newSocket) {
