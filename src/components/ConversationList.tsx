@@ -20,6 +20,7 @@ import {
   searchUserByUsername,
   startNewConversation,
 } from '../../api/conversations'; 
+import { getProfile } from '../../api/profile';
 
 const ConversationList: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -37,8 +38,10 @@ const ConversationList: React.FC = () => {
   } = conversationsState;
 
   const currentUser = useSelector((state: RootState) => state.auth.user);
+  const onlineUserIds = useSelector((state: RootState) => state.userStatus.onlineUserIds);
 
   const [searchUsername, setSearchUsername] = useState('');
+  const [avatarUrls, setAvatarUrls] = useState<{ [key: number]: string }>({});
 
   useEffect(() => {
     const getConversations = async () => {
@@ -106,6 +109,45 @@ const ConversationList: React.FC = () => {
     }
   };
 
+  //Gets the user avatars
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const newAvatarUrls: { [key: number]: string } = {};
+      const token = localStorage.getItem("authToken");
+
+      for (const conv of conversations) {
+        if (!conv.isGroupChat) {
+          const otherParticipant = conv.participants.find((p) => p.user.id !== currentUser.id);
+          if (otherParticipant) {
+            try {
+              const profile = await getProfile(otherParticipant.user.id, token);
+              if (profile && profile.avatarUrl) {
+                newAvatarUrls[conv.id] = profile.avatarUrl;
+              } else {
+                newAvatarUrls[conv.id] = `https://placehold.co/100x100/333333/FFFFFF?text=${getConversationDisplayName(conv).charAt(0).toUpperCase()}`;
+              }
+            } catch (err) {
+              console.error(`Error fetching profile for user ${otherParticipant.user.id}:`, err);
+              newAvatarUrls[conv.id] = `https://placehold.co/100x100/333333/FFFFFF?text=${getConversationDisplayName(conv).charAt(0).toUpperCase()}`;
+            }
+          }
+        }
+      }
+      setAvatarUrls(newAvatarUrls);
+    };
+
+    if (conversations.length > 0) {
+      fetchAvatars();
+    }
+  }, [conversations, currentUser.id]);
+
+  const isConversationOnline = (conv) => {
+    for (const p of conv.participants) {
+      if (p.userId !== currentUser.id && onlineUserIds.includes(p.userId)) return true;
+      return false;
+    }
+  }
+
   const getConversationDisplayName = (conversation: any) => {
     if (conversation.name && conversation.name.trim() !== '') {
       return conversation.name;
@@ -152,20 +194,32 @@ const ConversationList: React.FC = () => {
         {conversations.map((conv) => (
           <li
             key={conv.id}
-            className={`p-3 rounded-lg mb-2 cursor-pointer transition duration-200 ${
+            className={`p-3 rounded-lg mb-2 cursor-pointer transition duration-200 flex items-center ${ 
               conv.id === currentConversationId
                 ? 'bg-amber-600 text-white'
                 : 'bg-gray-800 hover:bg-amber-700 text-gray-100'
             }`}
             onClick={() => handleSelectConversation(conv.id)}
           >
-            <h4 className="font-semibold text-lg">{getConversationDisplayName(conv)}</h4>
-            {conv.lastMessage && (
-              <p className="text-sm text-gray-300 truncate">
-                {conv.lastMessage.sender.username === currentUser.username ? 'You: ' : `${conv.lastMessage.sender.username}: `}
-                {conv.lastMessage.content}
-              </p>
-            )}
+            <img
+              src={avatarUrls[conv.id] || `https://placehold.co/100x100/333333/FFFFFF?text=${getConversationDisplayName(conv).charAt(0).toUpperCase()}`}
+              alt={`${getConversationDisplayName(conv)}'s avatar`}
+              className="w-12 h-12 rounded-full border-2 border-blue-500 object-cover object-center mr-3" 
+            />
+            <div
+              className={`w-3 h-3 rounded-full mr-2 ${ 
+                isConversationOnline(conv) ? 'bg-green-400' : 'bg-yellow-400'
+              }`}
+            ></div> 
+            <div className="flex-grow"> 
+              <h4 className="font-semibold text-lg">{getConversationDisplayName(conv)}</h4>
+              {conv.lastMessage && (
+                <p className="text-sm text-gray-300 truncate">
+                  {conv.lastMessage.sender.username === currentUser.username ? 'You: ' : `${conv.lastMessage.sender.username}: `}
+                  {conv.lastMessage.content}
+                </p>
+              )}
+            </div>
           </li>
         ))}
       </ul>
