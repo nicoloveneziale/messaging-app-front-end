@@ -69,3 +69,27 @@ export const startNewConversation = async (participantIds: number[], isGroupChat
   const data = await response.json();
   return data; 
 };
+
+// Function to mark a conversation as read
+export const markConversationAsRead = async (conversationId: number) => {
+  const token = localStorage.getItem("authToken");
+  if (!token) {
+    throw new Error('No authentication token found.');
+  }
+
+  const response = await fetch(`${API_BASE_URL}/conversations/${conversationId}/read`, {
+    method: 'PUT', 
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || `Failed to mark conversation ${conversationId} as read.`);
+  }
+
+  const data = await response.json();
+  return data;
+};

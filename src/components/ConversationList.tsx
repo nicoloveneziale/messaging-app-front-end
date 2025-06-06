@@ -17,6 +17,7 @@ import {
 
 import {
   fetchAllConversations,
+  markConversationAsRead,
   searchUserByUsername,
   startNewConversation,
 } from '../../api/conversations'; 
@@ -54,6 +55,7 @@ const ConversationList: React.FC = () => {
         const token = localStorage.getItem("authToken")
         const data = await fetchAllConversations(token);
         dispatch(setConversations(data.conversations));
+        console.log(data.conversations[0])
       } catch (err: any) {
         dispatch(fetchConversationsFailure(err.message || 'Failed to load conversations.'));
       }

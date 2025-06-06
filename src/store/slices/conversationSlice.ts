@@ -14,7 +14,8 @@ interface Conversation {
     id: number;
     name: string | null;
     participants: {
-        user: {id: number, username: string}
+        user: {id: number, username: string};
+        lastReadAt: string;
     }[];
     lastMessage: {content: string; sender: {username:string}} | null;
     isGroupChat: boolean | null;

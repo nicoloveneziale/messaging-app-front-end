@@ -12,7 +12,8 @@ import {
   fetchConversationsFailure,
 } from '../store/slices/conversationSlice';
 import {
-  fetchAllConversations, 
+  fetchAllConversations,
+  markConversationAsRead, 
 } from '../../api/conversations'; 
 import {getConversationMessages} from "../../api/messages";
 import ConversationList from '../components/ConversationList';
@@ -62,6 +63,7 @@ const Chat: React.FC = () => {
   const socketRef = useRef<Socket | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
   const [profileUser, setProfileUser] = useState(null)
+  const [lastRead, setLastRead] = useState(null);
 
   //Setts emitters and initializes socket
   useEffect(() => {
@@ -127,10 +129,6 @@ const Chat: React.FC = () => {
       });
     });
 
-    newSocket.on('user:status', (userId: number, status: string) => {
-
-    })
-
     return () => {
       if (newSocket) {
         newSocket.off('connect');
@@ -169,6 +167,15 @@ const Chat: React.FC = () => {
 
   //Joining a new conversation
   useEffect(() => {
+    const otherParticipant = currentConversation?.participants.find(
+      (participant: any) => participant.userId !== currentUser.id
+    );
+    console.log(otherParticipant)
+
+    if (otherParticipant){
+      setLastRead(otherParticipant.lastReadAt)
+    }
+
     const socket = socketRef.current;
     if (socket && socketConnected && currentConversationId !== null) {
       socket.emit('join_conversation', currentConversationId);
@@ -192,13 +199,14 @@ const Chat: React.FC = () => {
           dispatch(fetchMessagesFailure(err.message || 'Failed to load messages for this conversation.'));
         }
       };
+      markConversationAsRead(currentConversationId)
       getMessages();
     }
     if (currentConversationId === null || !socketConnected) {
         setTypingUsers(new Map());
         setIsLocalUserTyping(false);
     }
-  }, [currentConversationId, socketConnected, currentUser?.id, dispatch]); 
+  }, [currentConversationId, socketConnected, currentConversation?.participants, currentUser?.id, dispatch]); 
 
   const emitTypingStart = useCallback(debounce(() => {
     const socket = socketRef.current;
@@ -311,7 +319,7 @@ const Chat: React.FC = () => {
                 <p className="text-center text-gray-400">No messages yet. Say hello!</p>
               )}
               {!messagesLoading && !messagesError && messages.length > 0 && (
-                <MessageList messages={messages} currentUser={currentUser} />
+                <MessageList messages={messages} currentUser={currentUser} lastRead={lastRead} />
               )}
             </div>
 
