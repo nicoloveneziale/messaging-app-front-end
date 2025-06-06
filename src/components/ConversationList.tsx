@@ -63,6 +63,10 @@ const ConversationList: React.FC = () => {
   }, [dispatch, currentUser.id]);
 
   const handleSelectConversation = (conversationId: number) => {
+    if (conversationId === currentConversationId) {
+      dispatch(setCurrentConversationId(null));
+      return;
+    }
     dispatch(setCurrentConversationId(conversationId));
   };
 
