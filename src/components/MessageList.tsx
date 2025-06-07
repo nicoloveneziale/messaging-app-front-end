@@ -43,8 +43,8 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUser, lastRe
         messages.map((message) => (
           <div
             key={message.id}
-            className={`flex mb-3 ${
-              message.sender.id === currentUser.id ? 'justify-end' : 'justify-start'
+            className={`flex flex-col mb-3 ${
+              message.sender.id === currentUser.id ? 'items-end' : 'items-start'
             }`}
           >
             <div
@@ -61,13 +61,12 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUser, lastRe
               <span className="block text-right text-xs mt-1">
                 {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
-
-              {message.sender.id === currentUser.id && message.id === lastReadMessageIdByOtherUser && (
-                <div className="text-right text-xs text-gray-300 mt-1 flex items-center justify-end">
+            </div>
+            {message.sender.id === currentUser.id && message.id === lastReadMessageIdByOtherUser && (
+                <div className="text-right text-xs text-gray-300 mt-1 mr-0">
                   <span>Read</span>
                 </div>
-              )}
-            </div>
+            )}
           </div>
         ))
       )}

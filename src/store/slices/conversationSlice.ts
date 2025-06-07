@@ -116,7 +116,23 @@ export const conversationSlice = createSlice({
             state.newConversationLoading = false;
             state.currentConversationId = action.payload; 
             state.searchUserError = 'Conversation with this user already exists. Selected existing chat.'; 
-        }
+        },
+        updateConversationLastReadAt: (
+          state,
+          action: PayloadAction<{ conversationId: number; userId: number; lastReadAt: string }>
+        ) => {
+          state.conversations = state.conversations.map((conv) => {
+            if (conv.id === action.payload.conversationId) {
+              const updatedParticipants = conv.participants.map((p) =>
+                p.user.id === action.payload.userId 
+                  ? { ...p, lastReadAt: action.payload.lastReadAt } 
+                  : p
+              );
+              return { ...conv, participants: updatedParticipants }; 
+            }
+            return conv;
+          });
+        },
     }
 })
 
@@ -134,7 +150,8 @@ export const {
   startNewConversationFailure,
   searchUserNotFound,
   clearSearchUserError,
-  conversationAlreadyExists 
+  conversationAlreadyExists,
+  updateConversationLastReadAt
 } = conversationSlice.actions;
 
 export default conversationSlice.reducer;

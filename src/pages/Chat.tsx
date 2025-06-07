@@ -10,6 +10,7 @@ import {
   fetchConversationsRequest,
   setConversations,
   fetchConversationsFailure,
+  updateConversationLastReadAt,
 } from '../store/slices/conversationSlice';
 import {
   fetchAllConversations,
@@ -20,6 +21,7 @@ import ConversationList from '../components/ConversationList';
 import MessageList from '../components/MessageList';
 import ProfileComponent from '../components/ProfileComponent';
 import { setOnlineUsers, updateUserStatus } from '../store/slices/userStatusSlice';
+import { useNavigate } from 'react-router-dom';
 
 interface Message {
   id: number;
@@ -64,6 +66,7 @@ const Chat: React.FC = () => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [profileUser, setProfileUser] = useState(null)
   const [lastRead, setLastRead] = useState(null);
+  const navigate = useNavigate();
 
   //Setts emitters and initializes socket
   useEffect(() => {
@@ -121,6 +124,12 @@ const Chat: React.FC = () => {
     newSocket.on('message:new', (newMessage: Message) => {
       if (newMessage.conversationId === currentConversationId) {
         dispatch(addNewMessage(newMessage));
+        const now = new Date().toISOString();
+        dispatch(updateConversationLastReadAt({
+          conversationId: newMessage.conversationId,
+          userId: currentUser.id,
+          lastReadAt: now,
+        }));
       }
       setTypingUsers(prev => {
         const newMap = new Map(prev);
@@ -154,7 +163,7 @@ const Chat: React.FC = () => {
         dispatch(fetchConversationsRequest());
         try {
           const token = localStorage.getItem('authToken');
-          if (!token) throw new Error('Authentication token not found.');
+          if (!token) navigate("/login");
           const data = await fetchAllConversations(token);
           dispatch(setConversations(data.conversations));
         } catch (err: any) {
@@ -170,11 +179,17 @@ const Chat: React.FC = () => {
     const otherParticipant = currentConversation?.participants.find(
       (participant: any) => participant.userId !== currentUser.id
     );
-    console.log(otherParticipant)
 
     if (otherParticipant){
       setLastRead(otherParticipant.lastReadAt)
     }
+
+    const now = new Date().toISOString();
+    dispatch(updateConversationLastReadAt({
+      conversationId: currentConversationId,
+      userId: currentUser.id,
+      lastReadAt: now,
+    }));
 
     const socket = socketRef.current;
     if (socket && socketConnected && currentConversationId !== null) {
@@ -192,7 +207,7 @@ const Chat: React.FC = () => {
         dispatch(fetchMessagesRequest());
         try {
           const token = localStorage.getItem('authToken');
-          if (!token) throw new Error('Authentication token not found.');
+          if (!token) navigate("/login");
           const data = await getConversationMessages(currentConversationId, token);
           dispatch(setMessages(data.messages)); 
         } catch (err: any) {
@@ -206,7 +221,7 @@ const Chat: React.FC = () => {
         setTypingUsers(new Map());
         setIsLocalUserTyping(false);
     }
-  }, [currentConversationId, socketConnected, currentConversation?.participants, currentUser?.id, dispatch]); 
+  }, [currentConversationId, socketConnected, currentUser?.id, dispatch]); 
 
   const emitTypingStart = useCallback(debounce(() => {
     const socket = socketRef.current;

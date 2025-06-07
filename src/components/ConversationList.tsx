@@ -55,7 +55,6 @@ const ConversationList: React.FC = () => {
         const token = localStorage.getItem("authToken")
         const data = await fetchAllConversations(token);
         dispatch(setConversations(data.conversations));
-        console.log(data.conversations[0])
       } catch (err: any) {
         dispatch(fetchConversationsFailure(err.message || 'Failed to load conversations.'));
       }
@@ -150,7 +149,12 @@ const ConversationList: React.FC = () => {
   const isConversationOnline = (conv) => {
     for (const p of conv.participants) {
       if (p.userId !== currentUser.id && onlineUserIds.includes(p.userId)) return true;
-      return false;
+    }
+  }
+
+  const hasUnreadMessage = (conv) => {
+    for (const p of conv.participants) {
+      if (p.userId === currentUser.id && p.lastReadAt < conv.lastMessage.createdAt) return true;
     }
   }
 
@@ -215,6 +219,11 @@ const ConversationList: React.FC = () => {
             <div
               className={`w-3 h-3 rounded-full mr-2 ${ 
                 isConversationOnline(conv) ? 'bg-green-400' : 'bg-yellow-400'
+              }`}
+            ></div> 
+            <div
+              className={`w-3 h-3 rounded-full mr-2 ${ 
+                hasUnreadMessage(conv) ? 'bg-green-400' : 'bg-yellow-400'
               }`}
             ></div> 
             <div className="flex-grow"> 
