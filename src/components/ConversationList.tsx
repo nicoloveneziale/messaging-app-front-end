@@ -182,7 +182,7 @@ const ConversationList: React.FC = () => {
         <br />
         <button
           onClick={handleStartNewConversation}
-          disabled={newConversationLoading} 
+          disabled={newConversationLoading}
           className={`w-full p-2 rounded transition duration-200 ${
             newConversationLoading ? 'bg-gray-500 cursor-not-allowed' : 'bg-amber-600 hover:bg-amber-700'
           } text-white font-semibold`}
@@ -204,9 +204,11 @@ const ConversationList: React.FC = () => {
         {conversations.map((conv) => (
           <li
             key={conv.id}
-            className={`p-3 rounded-lg mb-2 cursor-pointer transition duration-200 flex items-center ${ 
+            className={`p-3 rounded-lg mb-2 cursor-pointer transition duration-200 flex items-center ${
               conv.id === currentConversationId
                 ? 'bg-amber-600 text-white'
+                : hasUnreadMessage(conv)
+                ? 'bg-blue-400 text-white hover:bg-blue-500' 
                 : 'bg-gray-800 hover:bg-amber-700 text-gray-100'
             }`}
             onClick={() => handleSelectConversation(conv.id)}
@@ -214,25 +216,24 @@ const ConversationList: React.FC = () => {
             <img
               src={avatarUrls[conv.id] || `https://placehold.co/100x100/333333/FFFFFF?text=${getConversationDisplayName(conv).charAt(0).toUpperCase()}`}
               alt={`${getConversationDisplayName(conv)}'s avatar`}
-              className="w-12 h-12 rounded-full border-2 border-blue-500 object-cover object-center mr-3" 
+              className="w-12 h-12 rounded-full border-2 border-blue-500 object-cover object-center mr-3"
             />
             <div
-              className={`w-3 h-3 rounded-full mr-2 ${ 
+              className={`w-3 h-3 rounded-full mr-2 ${
                 isConversationOnline(conv) ? 'bg-green-400' : 'bg-yellow-400'
               }`}
-            ></div> 
-            <div
-              className={`w-3 h-3 rounded-full mr-2 ${ 
-                hasUnreadMessage(conv) ? 'bg-green-400' : 'bg-yellow-400'
-              }`}
-            ></div> 
-            <div className="flex-grow"> 
+            ></div>
+            <div className="flex-grow">
               <h4 className="font-semibold text-lg">{getConversationDisplayName(conv)}</h4>
-              {conv.lastMessage && (
-                <p className="text-sm text-gray-300 truncate">
-                  {conv.lastMessage.sender.username === currentUser.username ? 'You: ' : `${conv.lastMessage.sender.username}: `}
-                  {conv.lastMessage.content}
-                </p>
+              {hasUnreadMessage(conv) ? (
+                <p className="text-sm text-white truncate">New Post</p> 
+              ) : (
+                conv.lastMessage && (
+                  <p className="text-sm text-gray-300 truncate">
+                    {conv.lastMessage.sender.username === currentUser.username ? 'You: ' : `${conv.lastMessage.sender.username}: `}
+                    {conv.lastMessage.content}
+                  </p>
+                )
               )}
             </div>
           </li>
