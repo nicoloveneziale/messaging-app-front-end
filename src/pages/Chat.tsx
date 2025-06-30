@@ -68,7 +68,28 @@ const Chat: React.FC = () => {
   const [lastRead, setLastRead] = useState(null);
   const navigate = useNavigate();
 
-  //Setts emitters and initializes socket
+  //Get conversations
+  useEffect(() => {
+    const getConversations = async () => {
+      if (!currentUser?.id) {
+        return;
+      }
+      if (!conversationsLoading && conversations.length === 0) {
+        dispatch(fetchConversationsRequest());
+        try {
+          const token = localStorage.getItem('authToken');
+          if (!token) navigate("/login");
+          const data = await fetchAllConversations(token);
+          dispatch(setConversations(data.conversations));
+        } catch (err: any) {
+          dispatch(fetchConversationsFailure(err.message || 'Failed to load conversations.'));
+        }
+      }
+    };
+    getConversations();
+  }, [dispatch, currentUser?.id, conversationsLoading, conversations.length]);
+
+  //Sets emitters and initializes socket
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const socketUrl = 'http://localhost:8080';
@@ -82,6 +103,7 @@ const Chat: React.FC = () => {
 
     newSocket.on('connect', () => {
       setSocketConnected(true);
+      conversations.forEach(c => newSocket.emit('join_conversation', c.id));
     });
 
     newSocket.on('connect_error', () => {
@@ -121,7 +143,8 @@ const Chat: React.FC = () => {
       }
     });
 
-    newSocket.on('message:new', (newMessage: Message) => {
+    newSocket.on('message:new', (newMessage: Message, newConversation: any) => {
+      console.log(newMessage);
       if (newMessage.conversationId === currentConversationId) {
         dispatch(addNewMessage(newMessage));
         const now = new Date().toISOString();
@@ -130,13 +153,14 @@ const Chat: React.FC = () => {
           userId: currentUser.id,
           lastReadAt: now,
         }));
-      }
+      } 
       setTypingUsers(prev => {
         const newMap = new Map(prev);
         newMap.delete(newMessage.sender.id);
         return newMap;
       });
-    });
+    }
+  );
 
     return () => {
       if (newSocket) {
@@ -151,28 +175,7 @@ const Chat: React.FC = () => {
         setIsLocalUserTyping(false);
       }
     };
-  }, [dispatch, currentUser?.id, currentConversationId]); 
-
-  //Get conversations
-  useEffect(() => {
-    const getConversations = async () => {
-      if (!currentUser?.id) {
-        return;
-      }
-      if (!conversationsLoading && conversations.length === 0) {
-        dispatch(fetchConversationsRequest());
-        try {
-          const token = localStorage.getItem('authToken');
-          if (!token) navigate("/login");
-          const data = await fetchAllConversations(token);
-          dispatch(setConversations(data.conversations));
-        } catch (err: any) {
-          dispatch(fetchConversationsFailure(err.message || 'Failed to load conversations.'));
-        }
-      }
-    };
-    getConversations();
-  }, [dispatch, currentUser?.id, conversationsLoading, conversations.length]);
+  }, [dispatch, currentUser?.id, conversations]); 
 
   //Joining a new conversation
   useEffect(() => {
@@ -193,9 +196,8 @@ const Chat: React.FC = () => {
 
     const socket = socketRef.current;
     if (socket && socketConnected && currentConversationId !== null) {
-      socket.emit('join_conversation', currentConversationId);
 
-       setTypingUsers(new Map());
+      setTypingUsers(new Map());
       setIsLocalUserTyping(false);
       setProfileUser(null);
 
@@ -252,13 +254,16 @@ const Chat: React.FC = () => {
         conversationId: currentConversationId,
         content: messageContent,
       };
-
-      socket.emit('message:send', messageData, (status: 'success' | 'error', message?: string, newMessage?: Message) => {
+      socket.emit('message:send', messageData, (status: 'success' | 'error', message?: string, newMessage?: Message, newConversation?: any) => {
         if (status === 'success') {
-          setMessageContent(''); 
-        } 
-        setIsSending(false); 
+          setMessageContent('');
+        } else {
+            console.error("[Frontend - handleSendMessage Callback] Failed to send message:", message);
+        }
+        setIsSending(false);
       });
+      setIsSending(false);
+      setMessageContent('');
     } catch (error) {
       console.error('Unexpected error while preparing to send message:', error);
       setIsSending(false);
