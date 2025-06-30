@@ -145,8 +145,8 @@ const Chat: React.FC = () => {
 
     newSocket.on('message:new', (newMessage: Message, newConversation: any) => {
       console.log(newMessage);
+      dispatch(addNewMessage(newMessage));
       if (newMessage.conversationId === currentConversationId) {
-        dispatch(addNewMessage(newMessage));
         const now = new Date().toISOString();
         dispatch(updateConversationLastReadAt({
           conversationId: newMessage.conversationId,
