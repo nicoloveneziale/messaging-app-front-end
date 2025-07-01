@@ -20,7 +20,6 @@ const router = createBrowserRouter(
           <Route path="/chat" element={<Chat />} />
         </Route>
       </Route>
-      {/* <Route path="*" element={<NotFound />} /> */}
     </>
   )
 );

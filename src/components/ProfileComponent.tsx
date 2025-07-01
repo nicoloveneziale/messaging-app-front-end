@@ -11,7 +11,7 @@ interface User {
 
 interface ProfileComponentProps {
   user: User;
-  onClose: () => void; 
+  onClose: () => void;
 }
 
 const ProfileComponent: React.FC<ProfileComponentProps> = ({ user, onClose }) => {
@@ -53,19 +53,30 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({ user, onClose }) =>
       setLoading(false);
       setError("No user or profile ID provided.");
     }
-  }, [user.profileId, user]); 
+  }, [user.profileId, user]);
 
   if (!user) {
-    return null; 
+    return null;
   }
 
   return (
-    <div className="p-6 h-full flex flex-col bg-gray-800 text-gray-200 rounded-l-lg shadow-xl">
-      <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-700">
-        <h2 className="text-2xl font-bold text-white">Profile</h2>
+    <div className="
+      p-6 h-full flex flex-col bg-white text-gray-800
+      rounded-none border-l-2 border-black shadow-[4px_4px_0px_rgba(0,0,0,1)]
+    ">
+      <div className="
+        flex justify-between items-center mb-6 pb-4
+        border-b-2 border-black
+      ">
+        <h2 className="text-2xl font-extrabold text-black">
+          Profile
+        </h2>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-white transition duration-200 text-3xl leading-none focus:outline-none"
+          className="
+            text-black hover:text-gray-600 transition duration-200
+            text-4xl leading-none focus:outline-none font-thin
+          "
           aria-label="Close profile"
         >
           &times;
@@ -73,46 +84,51 @@ const ProfileComponent: React.FC<ProfileComponentProps> = ({ user, onClose }) =>
       </div>
 
       {loading && (
-        <p className="text-center text-gray-400">Loading profile...</p>
+        <p className="text-center text-gray-700 font-mono">Loading profile...</p>
       )}
 
       {error && (
-        <p className="text-center text-red-400">{error}</p>
+        <p className="text-center text-red-600 font-mono">{error}</p>
       )}
 
       {!loading && !error && profile && (
         <>
           <div className="flex flex-col items-center mb-6">
             <img
-              src={profile.avatarUrl || `https://placehold.co/100x100/333333/FFFFFF?text=${user.username.charAt(0).toUpperCase()}`}
+              src={profile.avatarUrl || `https://placehold.co/100x100/CCCCCC/000000?text=${user.username.charAt(0).toUpperCase()}`}
               alt={`${user.username}'s avatar`}
-              className="w-28 h-28 rounded-full border-4 border-blue-500 mb-4 object-cover object-center"
+              className="
+                w-28 h-28 rounded-full border-2 border-black mb-4
+                object-cover object-center shadow-[2px_2px_0px_rgba(0,0,0,1)]
+              "
             />
-            <h3 className="text-xl font-semibold text-white mb-1">{user.username}</h3>
-            <p className={`text-sm font-medium ${isUserOnline ? 'text-green-400' : 'text-yellow-400'}`}>
+            <h3 className="text-xl font-semibold text-black mb-1">
+              {user.username}
+            </h3>
+            <p className={`text-sm font-semibold font-mono ${isUserOnline ? 'text-green-600' : 'text-amber-600'}`}>
               {isUserOnline ? "Online" : "Offline"}
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 text-gray-300">
+          <div className="flex-1 overflow-y-auto custom-scrollbar space-y-4 text-gray-700">
             <div>
-              <p className="font-semibold text-gray-400">Bio:</p>
+              <p className="font-bold text-black">Bio:</p>
               <p className="text-sm leading-relaxed">{profile.bio || 'No bio available.'}</p>
             </div>
             <div>
-              <p className="font-semibold text-gray-400">Member Since:</p>
-              <p className="text-sm">{new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p className="font-bold text-black">Member Since:</p>
+              <p className="text-sm font-mono">{new Date(profile.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
             </div>
             <div>
-              <p className="font-semibold text-gray-400">User ID:</p>
-              <p className="text-sm break-words">{user.id}</p>
+              <p className="font-bold text-black">User ID:</p>
+              <p className="text-sm break-words font-mono">{user.id}</p>
             </div>
           </div>
         </>
       )}
 
       {!loading && !error && !profile && !user.profileId && (
-        <p className="text-center text-gray-400">No profile data to display.</p>
+        <p className="text-center text-gray-700 font-mono">No profile data to display.</p>
       )}
     </div>
   );

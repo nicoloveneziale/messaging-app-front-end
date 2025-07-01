@@ -35,40 +35,73 @@ const MessageList: React.FC<MessageListProps> = ({ messages, currentUser, lastRe
     }
   }
 
+  const userMessageBgColor = 'bg-amber-100';
+  const otherMessageBgColor = 'bg-blue-100';
+
+  const userMessageBorderColor = 'border-amber-300';
+  const otherMessageBorderColor = 'border-blue-300';
+
+  const userMessageShadowColor = 'shadow-amber-200/50';
+  const otherMessageShadowColor = 'shadow-blue-200/50';
+
+  const userMessageTextColor = 'text-amber-900';
+  const otherMessageTextColor = 'text-blue-900';
+
+
   return (
-    <div className="flex-grow bg-gray-800 h-full rounded-lg p-4 overflow-y-scroll custom-scrollbar">
+    <div className="flex-grow h-full p-4 overflow-y-scroll custom-scrollbar font-sans antialiased">
       {messages.length === 0 ? (
-        <p className="text-gray-400 text-center">No messages yet. Send the first one!</p>
+        <p className="text-gray-600 text-center font-mono text-xl italic mt-4">
+          No notes on this board yet. Send the first one!
+        </p>
       ) : (
-        messages.map((message) => (
-          <div
-            key={message.id}
-            className={`flex flex-col mb-3 ${
-              message.sender.id === currentUser.id ? 'items-end' : 'items-start'
-            }`}
-          >
+        messages.map((message) => {
+          const isCurrentUser = message.sender.id === currentUser.id;
+
+          const bgColor = isCurrentUser ? userMessageBgColor : otherMessageBgColor;
+          const borderColor = isCurrentUser ? userMessageBorderColor : otherMessageBorderColor;
+          const shadowColor = isCurrentUser ? userMessageShadowColor : otherMessageShadowColor;
+          const textColor = isCurrentUser ? userMessageTextColor : otherMessageTextColor;
+
+          const rotation = (message.id % 5) - 2;
+
+          return (
             <div
-              className={`max-w-[70%] py-2 px-4 rounded-lg shadow-md ${
-                message.sender.id === currentUser.id
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-gray-700 text-gray-100'
-              }`}
+              key={message.id}
+              className={`flex flex-col mb-4 relative
+                ${isCurrentUser ? 'items-end' : 'items-start'}
+              `}
             >
-              <p className="font-semibold text-sm mb-1">
-                {message.sender.id === currentUser.id ? 'You' : message.sender.username}
-              </p>
-              <p>{message.content}</p>
-              <span className="block text-right text-xs mt-1">
-                {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-            {message.sender.id === currentUser.id && message.id === lastReadMessageIdByOtherUser && (
-                <div className="text-right text-xs text-gray-300 mt-1 mr-0">
-                  <span>Read</span>
+              <div
+                className={`
+                  max-w-[75%] py-2.5 px-4 rounded-lg
+                  shadow-[4px_4px_0px_rgba(0,0,0,0.8)]
+                  ${bgColor} ${textColor}
+                  border-2 border-black
+                  transform rotate-[${rotation}deg]
+                  transition-all duration-150 ease-out
+                  relative
+                `}
+              >
+                <p className={`font-extrabold text-sm mb-1 ${isCurrentUser ? 'text-amber-800' : 'text-blue-800'}`}>
+                  {isCurrentUser ? 'You' : message.sender.username}
+                </p>
+                <p className="font-mono text-lg break-words">{message.content}</p>
+                <span className="block text-right text-xs mt-1 font-mono opacity-70">
+                  {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+
+              {isCurrentUser && message.id === lastReadMessageIdByOtherUser && (
+                <div className="text-right text-xs text-gray-500 font-mono italic mt-1 pr-1">
+                  <span className="bg-white rounded px-2 py-0.5 shadow-sm border border-gray-300">
+                    Read
+                  </span>
                 </div>
-            )}
-          </div>
-        ))
+              )}
+            </div>
+          );
+        })
       )}
       <div ref={messagesEndRef} />
     </div>
